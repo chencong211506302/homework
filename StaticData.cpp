@@ -12,50 +12,75 @@
 
 #include "StaticData.h"
 
-void StaticData::StaticData() {
+static StaticData* g_sharedStaticData = NULL;
 
+StaticData* StaticData::sharedStaticData() 
+{
+	if (g_sharedStaticData == NULL) {
+		g_sharedStaticData = new StaticData();
+		g_sharedStaticData->init();
+	}
+	return g_sharedStaticData;
 }
 
-StaticData StaticData::sharedStaticData() {
-
+void StaticData::purge() 
+{
+	CC_SAFE_RELEASE_NULL(g_sharedStaticData);
 }
 
-void StaticData::purge() {
-
+int StaticData::intValueFromKey(const string& key) 
+{
+	return _dictionary->valueForKey(key.c_str())->intValue();
 }
 
-int StaticData::intyValueForKey(std::string key) {
-
+const char* StaticData::stringValueFromKey(const string& key) 
+{
+	return _dictionary->valueForKey(key.c_str())->getCString();
 }
 
-int StaticData::stringValueFromKey(std::string key) {
-
+float StaticData::floatValueFromKey(const string& key) 
+{
+	return _dictionary->valueForKey(key.c_str())->floatValue();
 }
 
-float StaticData::floatValueFromKey(std::string key) {
-
+//根据键值得到bool类型数据
+bool StaticData::booleanFromKey(const string& key)
+{
+	return _dictionary->valueForKey(key.c_str())->boolValue();
 }
 
-bool StaticData::booleanFromKey(std::string key) {
-
+//根据键值得到point类型数据
+CCPoint StaticData::pointFromKey(const string& key) 
+{
+	return CCPointFromString(_dictionary->valueForKey(key.c_str())->getCString());
 }
 
-cocos2d::CCPoint StaticData::pointFromKey(std::string key) {
-
+//根据键值得到rect类型数据
+CCRect StaticData::rectFromKey(const string& key) 
+{
+	return CCRectFromString(_dictionary->valueForKey(key.c_str())->getCString());
 }
 
-cocos2d::CCRect StaticData::rectFromKey(std::string key) {
-
+CCSize StaticData::sizeFromKey(const string& key) 
+{
+	return CCSizeFromString(_dictionary->valueForKey(key.c_str())->getCString());
 }
 
-cocos2d::CCSize StaticData::sizeFromKey(std::string key) {
+bool StaticData::init() 
+{
+  //创建出词典对象
+	_dictionary = CCDictionary::createWithContentsOfFile(_staticFileName.c_str());
+	_dictionary->retain();
 
+	return true;
 }
 
-bool StaticData::init() {
-
+StaticData::~StaticData() 
+{
+	CC_SAFE_RELEASE_NULL(_dictionary);
 }
 
-StaticData::StaticData() {
-
+StaticData::StaticData()
+{
+	_staticFileName = STATIC_DATA_FILENAME;
 }
